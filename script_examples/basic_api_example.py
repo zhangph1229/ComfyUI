@@ -7,19 +7,20 @@ import random
 # keep in mind ComfyUI is pre alpha software so this format will change a bit.
 
 # this is the one for the default workflow
+# ['euler', 'euler_ancestral', 'heun', 'dpm_2', 'dpm_2_ancestral', 'lms', 'dpm_fast', 'dpm_adaptive', 'dpmpp_2s_ancestral', 'dpmpp_sde', 'dpmpp_2m', 'ddim', 'uni_pc', 'uni_pc_bh2']
 prompt_text = """
 {
     "3": {
         "class_type": "KSampler",
         "inputs": {
-            "cfg": 9,
+            "cfg": 7,
             "denoise": 1,
             "latent_image": [
                 "5",
                 0
             ],
             "model": [
-                "4",
+                "10",
                 0
             ],
             "negative": [
@@ -30,41 +31,41 @@ prompt_text = """
                 "6",
                 0
             ],
-            "sampler_name": "euler",
+            "sampler_name": "dpm_2_ancestral",
             "scheduler": "normal",
             "seed": 2435856907,
-            "steps": 20
+            "steps": 50
         }
     },
     "4": {
         "class_type": "CheckpointLoaderSimple",
         "inputs": {
-            "ckpt_name": "3Guofeng3_v33.safetensors"
+            "ckpt_name": "chilloutmix_NiPrunedFp32Fix.safetensors"
         }
     },
     "5": {
         "class_type": "EmptyLatentImage",
         "inputs": {
             "batch_size": 1,
-            "height": 512,
-            "width": 512
+            "height": 1024,
+            "width": 640
         }
     },
     "6": {
         "class_type": "CLIPTextEncode",
         "inputs": {
             "clip": [
-                "4",
+                "10",
                 1
             ],
-            "text": "best quality, masterpiece, highres, 1girl,blush,(seductive smile:0.8),star-shaped pupils,china hanfu,hair ornament,necklace, jewelry,Beautiful face,upon_body, tyndall effect,photorealistic, dark studio, rim lighting, two tone lighting,(high detailed skin:1.2), 8k uhd, dslr, soft lighting, high quality, volumetric lighting, candid, Photograph, high resolution, 4k, 8k, Bokeh"
+            "text": "((masterpiece)),(((bestquality))),illustration,1girl,maturefemale,smallbreast,beautifuldetailedeyes,longsleeves,hoodie,frills,extremelydetailedCGunity8kwallpaper,Loong,dragonbackground,loongbackground,gamecg,depthoffield,Capehood <lora:Dream:0.65>"
         }
     },
     "7": {
         "class_type": "CLIPTextEncode",
         "inputs": {
             "clip": [
-                "4",
+                "10",
                 1
             ],
             "text": "(((simple background))),monochrome ,lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, lowres, bad anatomy, bad hands, text, error, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, ugly,pregnant,vore,duplicate,morbid,mut ilated,tran nsexual, hermaphrodite,long neck,mutated hands,poorly drawn hands,poorly drawn face,mutation,deformed,blurry,bad anatomy,bad proportions,malformed limbs,extra limbs,cloned face,disfigured,gross proportions, (((missing arms))),(((missing legs))), (((extra arms))),(((extra legs))),pubic hair, plump,bad legs,error legs,username,blurry,bad feet"
@@ -86,17 +87,34 @@ prompt_text = """
     "9": {
         "class_type": "SaveImage",
         "inputs": {
-            "filename_prefix": "model_1_task_id_10000",
+            "filename_prefix": "model_1_task_id_10000_4",
             "images": [
                 "8",
                 0
             ]
         }
+    }, 
+    "10": {
+      "class_type": "LoraLoader",
+      "inputs": {
+      "lora_name": "cuteGirlMix4_v10.safetensors",
+      "strength_model":0.8,
+      "strength_clip":0.8,
+        "model":[
+            "4",
+            0 
+        ], 
+        "clip":[
+            "4", 
+            1
+        ]
+      }
     }
 }
 """
 
 url = "http://47.100.221.170:8188/prompt"
+
 
 def queue_prompt(prompt):
     p = {"prompt": prompt}
