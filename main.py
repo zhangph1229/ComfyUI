@@ -8,7 +8,9 @@ from comfy.cli_args import args
 
 if os.name == "nt":
     import logging
-    logging.getLogger("xformers").addFilter(lambda record: 'A matching Triton is not available' not in record.getMessage())
+
+    logging.getLogger("xformers").addFilter(
+        lambda record: 'A matching Triton is not available' not in record.getMessage())
 
 if __name__ == "__main__":
     if args.dont_upcast_attention:
@@ -18,7 +20,6 @@ if __name__ == "__main__":
     if args.cuda_device is not None:
         os.environ['CUDA_VISIBLE_DEVICES'] = str(args.cuda_device)
         print("Set cuda device to:", args.cuda_device)
-
 
 import yaml
 
@@ -35,23 +36,29 @@ def prompt_worker(q, server):
         e.execute(item[-2], item[-1])
         q.task_done(item_id, e.outputs)
 
+
 async def run(server, address='', port=8188, verbose=True, call_on_start=None):
     await asyncio.gather(server.start(address, port, verbose, call_on_start), server.publish_loop())
+
 
 def hijack_progress(server):
     from tqdm.auto import tqdm
     orig_func = getattr(tqdm, "update")
+
     def wrapped_func(*args, **kwargs):
         pbar = args[0]
         v = orig_func(*args, **kwargs)
-        server.send_sync("progress", { "value": pbar.n, "max": pbar.total}, server.client_id)            
+        server.send_sync("progress", {"value": pbar.n, "max": pbar.total}, server.client_id)
         return v
+
     setattr(tqdm, "update", wrapped_func)
+
 
 def cleanup_temp():
     temp_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "temp")
     if os.path.exists(temp_dir):
         shutil.rmtree(temp_dir, ignore_errors=True)
+
 
 def load_extra_path_config(yaml_path):
     with open(yaml_path, 'r') as stream:
@@ -73,6 +80,17 @@ def load_extra_path_config(yaml_path):
                 print("Adding extra search path", x, full_path)
                 folder_paths.add_model_folder_path(x, full_path)
 
+
+import socket
+
+
+def get_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ip = s.getsockname()[0]
+    return ip
+
+
 if __name__ == "__main__":
     cleanup_temp()
 
@@ -93,12 +111,12 @@ if __name__ == "__main__":
     server.add_routes()
     hijack_progress(server)
 
-    threading.Thread(target=prompt_worker, daemon=True, args=(q,server,)).start()
+    threading.Thread(target=prompt_worker, daemon=True, args=(q, server,)).start()
 
-    address = args.listen
+    # address = args.listen
+    address = get_ip()
 
     dont_print = args.dont_print_server
-
 
     if args.output_directory:
         output_dir = os.path.abspath(args.output_directory)
@@ -115,14 +133,18 @@ if __name__ == "__main__":
         def startup_server(address, port):
             import webbrowser
             webbrowser.open("http://{}:{}".format(address, port))
+
+
         call_on_start = startup_server
 
     if os.name == "nt":
         try:
-            loop.run_until_complete(run(server, address=address, port=port, verbose=not dont_print, call_on_start=call_on_start))
+            loop.run_until_complete(
+                run(server, address=address, port=port, verbose=not dont_print, call_on_start=call_on_start))
         except KeyboardInterrupt:
             pass
     else:
-        loop.run_until_complete(run(server, address=address, port=port, verbose=not dont_print, call_on_start=call_on_start))
+        loop.run_until_complete(
+            run(server, address=address, port=port, verbose=not dont_print, call_on_start=call_on_start))
 
     cleanup_temp()
