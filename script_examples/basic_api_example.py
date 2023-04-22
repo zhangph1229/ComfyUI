@@ -12,7 +12,7 @@ prompt_text = """
     "3": {
         "class_type": "KSampler",
         "inputs": {
-            "cfg": 8,
+            "cfg": 9,
             "denoise": 1,
             "latent_image": [
                 "5",
@@ -32,14 +32,14 @@ prompt_text = """
             ],
             "sampler_name": "euler",
             "scheduler": "normal",
-            "seed": 8566257,
+            "seed": 2435856907,
             "steps": 20
         }
     },
     "4": {
         "class_type": "CheckpointLoaderSimple",
         "inputs": {
-            "ckpt_name": "v1-5-pruned-emaonly.ckpt"
+            "ckpt_name": "3Guofeng3_v33.safetensors"
         }
     },
     "5": {
@@ -57,7 +57,7 @@ prompt_text = """
                 "4",
                 1
             ],
-            "text": "masterpiece best quality girl"
+            "text": "best quality, masterpiece, highres, 1girl,blush,(seductive smile:0.8),star-shaped pupils,china hanfu,hair ornament,necklace, jewelry,Beautiful face,upon_body, tyndall effect,photorealistic, dark studio, rim lighting, two tone lighting,(high detailed skin:1.2), 8k uhd, dslr, soft lighting, high quality, volumetric lighting, candid, Photograph, high resolution, 4k, 8k, Bokeh"
         }
     },
     "7": {
@@ -67,7 +67,7 @@ prompt_text = """
                 "4",
                 1
             ],
-            "text": "bad hands"
+            "text": "(((simple background))),monochrome ,lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, lowres, bad anatomy, bad hands, text, error, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, ugly,pregnant,vore,duplicate,morbid,mut ilated,tran nsexual, hermaphrodite,long neck,mutated hands,poorly drawn hands,poorly drawn face,mutation,deformed,blurry,bad anatomy,bad proportions,malformed limbs,extra limbs,cloned face,disfigured,gross proportions, (((missing arms))),(((missing legs))), (((extra arms))),(((extra legs))),pubic hair, plump,bad legs,error legs,username,blurry,bad feet"
         }
     },
     "8": {
@@ -86,7 +86,7 @@ prompt_text = """
     "9": {
         "class_type": "SaveImage",
         "inputs": {
-            "filename_prefix": "ComfyUI",
+            "filename_prefix": "model_1_task_id_10000",
             "images": [
                 "8",
                 0
@@ -95,15 +95,14 @@ prompt_text = """
     }
 }
 """
-ip = '47.100.221.170'
-url = "http://" + ip + ":8188/prompt"
 
+url = "http://47.100.221.170:8188/prompt"
 
 def queue_prompt(prompt):
     p = {"prompt": prompt}
     data = json.dumps(p).encode('utf-8')
     req = request.Request(url, data=data)
-    request.urlopen(req)
+    return request.urlopen(req)
 
 
 prompt = json.loads(prompt_text)
@@ -113,4 +112,5 @@ prompt["6"]["inputs"]["text"] = "masterpiece best quality man"
 # set the seed for our KSampler node
 prompt["3"]["inputs"]["seed"] = 5
 
-queue_prompt(prompt)
+output = queue_prompt(prompt)
+print(output.status)
